@@ -26,6 +26,7 @@ fuente = pygame.font.Font("freesansbold.ttf", 30)
 fuente2 = pygame.font.Font("freesansbold.ttf", 40)
 fuente_p = pygame.font.Font("freesansbold.ttf", 20)
 fuente_p2 = pygame.font.Font("freesansbold.ttf", 15)
+title = pygame.font.Font("freesansbold.ttf", 100)
 
 #SONIDOS-------------
 move_sound = pygame.mixer.Sound("assets/move-self.mp3")
@@ -545,16 +546,21 @@ def draw_check():
     checked = False
     if turn_step < 2:
         king_index = piezas_blancas.index("king")
-        if jaque("white"):
+        if jaque("white") and not white_options == [[] for _ in range(len(piezas_blancas))]:
             if counter < 15:
                 pygame.draw.rect(pantalla, (255, 107, 107), (location_blancas[king_index][0] * ANCHO_CASILLA, location_blancas[king_index][1] * ALTO_CASILLA + GAP/2, ANCHO_CASILLA, ALTO_CASILLA), width=5)
             checked = True
+        elif jaque("white") and white_options == [[] for _ in range(len(piezas_blancas))]:
+            pygame.draw.rect(pantalla, (255, 107, 107), (location_negras[king_index][0] * ANCHO_CASILLA, location_negras[king_index][1] * ALTO_CASILLA + GAP/2, ANCHO_CASILLA, ALTO_CASILLA), width=5)
     else:
         king_index = piezas_negras.index("king")
-        if jaque("black"):
+        if jaque("black") and not black_options == [[] for _ in range(len(piezas_negras))]:
             if counter < 15:
                 pygame.draw.rect(pantalla, (255, 107, 107), (location_negras[king_index][0] * ANCHO_CASILLA, location_negras[king_index][1] * ALTO_CASILLA + GAP/2, ANCHO_CASILLA, ALTO_CASILLA), width=5)
             checked = True
+        elif jaque("black") and black_options == [[] for _ in range(len(piezas_negras))]:
+            pygame.draw.rect(pantalla, (255, 107, 107), (location_negras[king_index][0] * ANCHO_CASILLA, location_negras[king_index][1] * ALTO_CASILLA + GAP/2, ANCHO_CASILLA, ALTO_CASILLA), width=5)
+
 
 #main game loop
 update_all_options()
@@ -573,6 +579,12 @@ while run:
     if selection != 100:
         valid_moves = check_valid_moves()
         draw_valid(valid_moves)
+    if black_options == [[] for _ in range(len(piezas_negras))]:
+        pantalla.blit(title.render("White wins!", True, "black"), (ANCHO//2 - 400, ALTO//2))
+    elif white_options == [[] for _ in range(len(piezas_blancas))]:
+        pantalla.blit(title.render("Black wins!", True, "black"), (ANCHO//2 - 400, ALTO//2 ))
+
+
     #event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -647,6 +659,6 @@ while run:
                 if turn_step == 3 and click_coords not in location_negras:
                     selection = 100
                     turn_step = 2
-
+            
     pygame.display.update()
 pygame.quit()
