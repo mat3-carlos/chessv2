@@ -127,6 +127,8 @@ piece_list = ["pawn", "queen", "king", "knight", "rook", "bishop"]
 
 #check variables / flashing counter
 counter = 0
+timer_white = 300
+timer_black = 300
 
 #drawing main board
 def draw_board():
@@ -561,7 +563,16 @@ def draw_check():
         elif jaque("black") and black_options == [[] for _ in range(len(piezas_negras))]:
             pygame.draw.rect(pantalla, (255, 107, 107), (location_negras[king_index][0] * ANCHO_CASILLA, location_negras[king_index][1] * ALTO_CASILLA + GAP/2, ANCHO_CASILLA, ALTO_CASILLA), width=5)
 
-
+def draw_timer():
+    timer_white_format = f"{timer_white//60:.0f}:{int(timer_white%60):02d}"
+    pygame.draw.rect(pantalla, "white", (ANCHO - 178, ALTO - 98, 120 , 40), 0 , border_radius=8)
+    pygame.draw.rect(pantalla, "black",(ANCHO - 178, 62, 120, 40), 0 , border_radius=8)
+    timer_black_format = f"{timer_black//60:.0f}:{int(timer_black%60):02d}"
+    timer_white_text = fuente.render(timer_white_format, True, "black")
+    timer_black_text = fuente.render(timer_black_format, True, "white")
+    pantalla.blit(timer_white_text, (ANCHO - 150, ALTO - 90))
+    pantalla.blit(timer_black_text, (ANCHO - 150, 70))
+    
 #main game loop
 update_all_options()
 run = True
@@ -576,14 +587,20 @@ while run:
     draw_pieces()
     draw_captured()
     draw_check()
+    draw_timer()
     if selection != 100:
         valid_moves = check_valid_moves()
         draw_valid(valid_moves)
-    if black_options == [[] for _ in range(len(piezas_negras))]:
+    if black_options == [[] for _ in range(len(piezas_negras))] or timer_black <= 0:
         pantalla.blit(title.render("White wins!", True, "black"), (ANCHO//2 - 400, ALTO//2))
-    elif white_options == [[] for _ in range(len(piezas_blancas))]:
+        timer_black = 0
+    elif white_options == [[] for _ in range(len(piezas_blancas))] or timer_white <= 0:
         pantalla.blit(title.render("Black wins!", True, "black"), (ANCHO//2 - 400, ALTO//2 ))
-
+        timer_white = 0
+    if turn_step <= 1: 
+                timer_white -= 1/fps
+    elif turn_step >= 2:
+                timer_black -= 1/fps
 
     #event handling
     for event in pygame.event.get():
@@ -601,7 +618,6 @@ while run:
 
             #TURNO DE BLANCAS
             if turn_step <= 1: 
-                
                 if click_coords in location_blancas: 
                     selection = location_blancas.index(click_coords) #Selecciona pieza blanca
                     if turn_step == 0:
